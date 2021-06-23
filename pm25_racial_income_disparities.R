@@ -1,8 +1,29 @@
-### Racial and income disparities in ambient exposure to fine particulate matter in1the United States 
-
 library("tidyverse")
 library("ineq")
 library("ggplot2")
+
+
+# SECTION 0 - SETUP ---------------------------------------------------------
+# ATTENTION: please rerun the whole script if any of these parameters are changed 
+
+# all available years in dataset
+available_years = 2000:2016
+
+# parameter for Atkinson index 
+eps = 0.75 
+
+# categorize population into groups by "medhouseholdincome"
+# group 1, 2, 3 has low income; 
+# group 4, 5, 6, 7 has moderate income; 
+# group 8, 9, 10 has high income; 
+n=10; r=8; p=3
+
+# different PM levels the data will be categorized into
+thresholds=c(seq(6,16,2)) 
+
+# analysis on urban area only
+urban = TRUE
+rural = TRUE
 
 # function that returns the percentage of ethnic group exposed to PM higher than the input threshold
 atkinson.ethnic = function(df, pm.threshold) {
@@ -26,27 +47,6 @@ atkinson.income = function(df, pm.threshold) {
   return(output)
 }
 
-# rerun the whole script if any of these parameters been changed ------------------------
-# all available years in dataset
-available_years = 2000:2016
-
-# parameter for Atkinson index 
-eps = 0.75 
-
-# categorize population into groups by "medhouseholdincome"
-# group 1, 2, 3 has low income; 
-# group 4, 5, 6, 7 has moderate income; 
-# group 8, 9, 10 has high income; 
-n=10; r=8; p=3
-
-# different PM levels the data will be categorized into
-thresholds=c(seq(6,16,2)) 
-
-# analysis on urban area only
-urban = TRUE
-rural = TRUE
-
-
 # SECTION 1 - READ AND CLEAN DATA---------------------------------------------------------
 part1 = read.csv("./data/data_part1.csv", header=TRUE)
 part2 = read.csv("./data/data_part2.csv", header=TRUE)
@@ -58,7 +58,6 @@ final_pm_data = do.call("rbind", list(part1, part2, part3, part4, part5))
 rm(part1, part2, part3, part4, part5)
 # write.csv(final_pm_data, "./data/pm25_racial_income_disparities.csv")
 # final_pm_data = read.csv("./data/pm25_racial_income_disparities.csv", header=TRUE)
-
 no_na_all_years_pm_data = na.omit(final_pm_data)
 
 
@@ -128,13 +127,12 @@ native_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(po
 asian_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))  
 white_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops)) 
 
-# 
+# Percentage of a ethnic&income group out of the ethinic population between different PM levels
 rich_black_average_pm=numeric(length(available_years))
 rich_hisp_average_pm=numeric(length(available_years))
 rich_native_average_pm=numeric(length(available_years))
 rich_asian_average_pm=numeric(length(available_years))
 rich_white_average_pm=numeric(length(available_years))
-
 poor_black_average_pm=numeric(length(available_years))
 poor_hisp_average_pm=numeric(length(available_years))
 poor_native_average_pm=numeric(length(available_years))
@@ -206,8 +204,6 @@ for (y in available_years){
       pop_betw_pm[j]=sum(pm_data$population[pm_data$pm25<thresholds[j] & pm_data$pm25>thresholds[j-1]])/sum(pm_data$population)
     }
   }
-  # pop_betw_pm[7]=sum(pm_data$population[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$population)
-  # confirm 
   pop_betw_pm[7]=sum(pm_data$population[pm_data$pm25>16])/sum(pm_data$population)
 
   dp_pop_betw_pm = pm_grouped_by2[,2] / sum(pm_grouped_by2[,2], na.rm=TRUE) # Poor
@@ -301,12 +297,6 @@ for (y in available_years){
       white_betw_pm[j]=sum(pm_data$white_pop[pm_data$pm25<thresholds[j] & pm_data$pm25>thresholds[j-1]])/sum(pm_data$white_pop)
     }
   }
-  # black_betw_pm[7]=sum(pm_data$black_pop[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$black_pop)
-  # hisp_betw_pm[7]=sum(pm_data$hisp_pop[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$hisp_pop)
-  # native_betw_pm[7]=sum(pm_data$native_pop[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$native_pop)
-  # asian_betw_pm[7]=sum(pm_data$asian_pop[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$asian_pop)
-  # white_betw_pm[7]=sum(pm_data$white_pop[pm_data$pm25<19 & pm_data$pm25>16])/sum(pm_data$white_pop)
-  # confirm 
   black_betw_pm[7]=sum(pm_data$black_pop[pm_data$pm25>16])/sum(pm_data$black_pop)
   hisp_betw_pm[7]=sum(pm_data$hisp_pop[pm_data$pm25>16])/sum(pm_data$hisp_pop)
   native_betw_pm[7]=sum(pm_data$native_pop[pm_data$pm25>16])/sum(pm_data$native_pop)
@@ -403,9 +393,10 @@ pm.colors = c(rgb(76,98,143,255,maxColorValue=255),
               rgb(155,197,126,255,maxColorValue=255), 
               rgb(242,155,110,255,maxColorValue=255))
 
+
 if (urban==T&rural==T) {
   ### Figure A.1
-  png("national_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/national_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(available_years,national_average_pm,type="l",xlab="Year",ylab="",lwd=2,ylim = c(7,13))
   mtext(ylab.text,side=2, line =2.5)
@@ -414,7 +405,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.4a 
-  png("ethnic_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/ethnic_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(c(available_years),black_average_pm,ylim=c(6, 15),xlim=c(2000, 2017),type="l",lwd=2,col="red",
        xlab="Year",ylab="")
@@ -431,7 +422,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.4b
-  png("density_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/density_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(c(pops),black_zcta_above_pop[17,],type="l",ylim=c(2,10), 
        lwd=2,lty=1,col="red",xlab="Ethnic population in ZCTA (fraction)",ylab="")
@@ -449,7 +440,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.5
-  png("income_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/income_pm_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(c(available_years),average_pm_poor,ylim=c(6, 14),xlim=c(2000, 2016),type="l",col="red",xlab="Year",ylab="",lwd=2) 
   mtext(ylab.text,side=2, line =2.5)
@@ -462,7 +453,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.6a
-  png("HI_Ethnic_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/HI_Ethnic_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(c(available_years),rich_black_average_pm,ylim=c(7, 15),xlim=c(2000, 2017),type="l",lwd=2,col="red",xlab="Year",ylab="")
   mtext(ylab.text,side=2, line =2.5)
@@ -477,7 +468,7 @@ if (urban==T&rural==T) {
   dev.off()
   
   ### Figure A.6b 
-  png("LI_Ethnic_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/LI_Ethnic_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   ylab.text = expression(paste('Average PM'['2.5']*' (',mu,'g/m'^"3"*')'))
   plot(c(available_years),poor_black_average_pm,ylim=c(5, 16),xlim=c(2000, 2017),type="l",lwd=2,col="red",xlab="Year",ylab="")
   mtext(ylab.text,side=2, line =2.5)
@@ -494,7 +485,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.8a Atkinson Index figures
-  png("Atkinson_Racial_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/Atkinson_Racial_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   plot(c(available_years),Atkinson_PM_level_ethnic_8,ylim=c(0.005, 0.20),xlim=c(2000, 2017), lwd=2, type="l", col=pm.colors[1], 
        xlab="Year",ylab="Atkinson Index - Racial / Ethnic")
   lines(c(available_years),Atkinson_PM_level_ethnic_10, lwd=2, col=pm.colors[2]) 
@@ -506,7 +497,7 @@ if (urban==T&rural==T) {
   
   
   ## Figure A.8b Gini Index figures
-  png("Gini_Racial_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/Gini_Racial_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   plot(c(available_years),Gini_PM_level_ethnic_8,ylim=c(0.05, 0.35),xlim=c(2000, 2017),type="l", lwd=2, col=pm.colors[1],
        xlab="Year",ylab="Gini Index - Racial / Ethnic")
   lines(c(available_years),Gini_PM_level_ethnic_10, lwd=2, col=pm.colors[2]) 
@@ -523,7 +514,7 @@ if (urban==T&rural==T) {
   for (i in 1:length(eps.list)) eps.labs[i] = paste0("eps=", eps.list[i])
   
   ### Figure A.9a
-  png("atkinson_race_sensitivity_pm8_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/atkinson_race_sensitivity_pm8_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   pm.threshold = 8
   
   plot(c(available_years),rep(NULL, 17),ylim=c(0, 0.15), xlim=c(2000, 2017) ,type="l", lwd=2,
@@ -554,7 +545,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.9b
-  png("atkinson_race_sensitivity_pm10_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/atkinson_race_sensitivity_pm10_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   pm.threshold = 10
   
   plot(c(available_years),rep(NULL, 17),ylim=c(0, 0.20), xlim=c(2000, 2017) ,type="l", lwd=2,
@@ -585,7 +576,7 @@ if (urban==T&rural==T) {
   
   
   ### Figure A.9c
-  png("atkinson_race_sensitivity_pm12_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
+  png("./output/atkinson_race_sensitivity_pm12_update.jpeg", units="mm", width=width, height=height, res=res, pointsize=pointsize)
   pm.threshold = 12
   
   plot(c(available_years),rep(NULL, 17),ylim=c(0, 0.40), xlim=c(2000, 2017) ,type="l", lwd=2,
@@ -626,13 +617,13 @@ pointsize_f10 = 10
 
 ### National Figure A.1
 if (urban==T&rural==T) {
-  file_name = "f10_national.jpeg"
+  file_name = "./output/f10_national.jpeg"
   ilabel = "a"
 } else if (urban==T&rural==F) {
-  file_name = "f10_urban.jpeg"
+  file_name = "./output/f10_urban.jpeg"
   ilabel = "b"
 } else {
-  file_name = "f10_rural.jpeg"
+  file_name = "./output/f10_rural.jpeg"
   ilabel = "c"}
 
 png(file_name, units="mm", width=width_f10, height=height_f10*2.6, res=res, pointsize=pointsize_f10)
@@ -663,7 +654,6 @@ legend(2010, 15, legend=c("Black","White","Hispanic","Asian","Native American"),
 mtext(ilabel, adj = 0.01, line = -2, cex=8/7, font=2)
 
 
-
 ### National Figure A.5
 if (urban==T&rural==T) {
   ilabel = "g"
@@ -678,7 +668,7 @@ grid()
 legend(2010, 14, legend=c("Low income","High income"),
        col=c("red","blue"), lwd=2, cex=0.7)  
 mtext(ilabel, adj = 0.01, line = -2, cex=8/7, font=2)
-# dev.off()
+dev.off()
 
 
 ### CoV for race ------------------------------------------------------------------------------------
@@ -721,13 +711,13 @@ f4$group = as.factor(f4$group)
 f4$group = factor(f4$group, levels = c("above8", "above10", "above12"))
 
 if (urban==T&rural==T) {
-  file_name = "f10_national_j.jpeg"
+  file_name = "./output/f10_national_j.jpeg"
   ilabel = "j"
 } else if (urban==T&rural==F) {
-  file_name = "f10_urban_k.jpeg"
+  file_name = "./output/f10_urban_k.jpeg"
   ilabel = "k"
 } else {
-  file_name = "f10_rural_l.jpeg"
+  file_name = "./output/f10_rural_l.jpeg"
   ilabel = "l"}
 
 png(file_name, units="mm", width=width_f10, height=height_f10+10, res=res, pointsize=6)
@@ -740,7 +730,7 @@ ggplot(data=f4) +
   scale_color_manual(name="Population Living in Pollution (%)", values = pm.colors, labels=c("Threshold=8", "Threshold=10", "Threshold=12"), 
                      guide = guide_legend(title.position = "top", nrow = 1)) +
   scale_y_continuous(name="Population Living in Pollution (%)", limits = c(0, 100),
-                     sec.axis = sec_axis(~./200, name="Disparities among racial/ethnic groups",)) + 
+                     sec.axis = sec_axis(~./200, name="Disparities among racial/ethnic groups")) + 
   theme(axis.title = element_blank(), plot.margin=unit(c(2,0,0,0),"mm"), 
         legend.position = "bottom", legend.box="vertical",
         legend.spacing = unit(0, "lines"), 
@@ -757,7 +747,7 @@ dev.off()
 
 ### Figure 4
 if (urban==T&rural==T) {
-  png("inequality_ethnic_cov_updated.jpeg", units="mm", width=120, height=height, res=res, pointsize=7)
+  png("./output/inequality_ethnic_cov_updated.jpeg", units="mm", width=120, height=height, res=res, pointsize=7)
   ggplot(data=f4) +
     geom_line(aes(x = year, y = exposure, colour=group), size=.5) + 
     geom_bar(aes(x = year, y = disparity*200, fill=group), stat ="identity", position="dodge") +
@@ -767,7 +757,7 @@ if (urban==T&rural==T) {
     scale_color_manual(name="Population Living in Pollution (%)", values = pm.colors, labels=c("Threshold=8", "Threshold=10", "Threshold=12"), 
                        guide = guide_legend(title.position = "top", nrow = 1)) +
     scale_y_continuous(name="Population Living in Pollution (%)", limits = c(0, 100),
-                       sec.axis = sec_axis(~./200, name="Disparities among racial/ethnic groups",)) + 
+                       sec.axis = sec_axis(~./200, name="Disparities among racial/ethnic groups")) + 
     theme(plot.margin=unit(c(2,0,0,0),"mm"), # axis.title = element_blank(), 
           legend.position = "bottom", legend.box="horizontal",
           legend.spacing = unit(0, "lines"), 
@@ -780,8 +770,6 @@ if (urban==T&rural==T) {
           legend.box.margin=margin(-5,-5,0,0))
   dev.off()
 }
-
-
 
 
 
@@ -802,217 +790,3 @@ sum(df$population[df$year==2016&df$pm25>=8]) / sum(df$population[df$year==2016])
 (average_pm_poor - average_pm_rich) / average_pm_rich * 100  
 
 
-
-
-################# Inequality in Income
-# r8= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# m8= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# p8= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# T8=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# iaverage8=(r8+m8+p8)/3
-# iineq8=(abs(r8-iaverage8)^2+abs(m8-iaverage8)^2+abs(p8-iaverage8)^2)/iaverage8^2
-# 
-# r10= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# m10= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# p10= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# T10=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# iaverage10=(r10+m10+p10)/3
-# iineq10=(abs(r10-iaverage10)^2+abs(m10-iaverage10)^2+abs(p10-iaverage10)^2)/iaverage10^2
-# 
-# 
-# r12= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# m12= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# p12= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# T12=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# iaverage12=(r12+m12+p12)/3
-# iineq12=(abs(r12-iaverage12)^2+abs(m12-iaverage12)^2+abs(p12-iaverage12)^2)/iaverage12^2
-# 
-# plot(T8,iineq8,type="l",xlim=c(0,0.95),ylim=c(0,1.2))
-# lines(T10,iineq10,col="red")
-# lines(T10,eineq10,col="red",lty=2)
-# lines(T8,eineq8,col="black",lty=2)
-
-################# Inequality in Income alternative
-# r8= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# m8= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# p8= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# T8=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# iaverage8=(r8+p8)/2
-# iineq8=(abs(r8-iaverage8)^2+abs(p8-iaverage8)^2)/iaverage8^2
-# 
-# r10= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# m10= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# p10= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# T10=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-# iaverage10=(r10+p10)/2
-# iineq10=(abs(r10-iaverage10)^2+abs(p10-iaverage10)^2)/iaverage10^2
-# 
-# 
-# r12= apply(rich_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# m12= apply(moderate_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# p12= apply(poor_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# T12=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-# iaverage12=(r12+p12)/2
-# iineq12=(abs(r12-iaverage12)^2+abs(p12-iaverage12)^2)/iaverage12^2
-# 
-# plot(T8,iineq8,type="l",xlim=c(0,0.95),ylim=c(0,1.5))
-# lines(T10,iineq10,col="red")
-# lines(T12,iineq12,col="blue")
-
-
-##### Inequality new way (removed from revised version)
-
-#T8=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-# iaverage8=rowMeans(pop_above8)
-# iineq8=(rowSums(abs(pop_above8-iaverage8)^2)/10)/iaverage8^2
-# 
-# iaverage10=rowMeans(pop_above10)
-# iineq10=(rowSums(abs(pop_above10-iaverage10)^2)/10)/iaverage10^2
-# 
-# iaverage12=rowMeans(pop_above12)
-# iineq12=rowSums(abs(pop_above12-iaverage12)^2)/iaverage12^2
-
-# make dataframe
-#df_urban=data.frame(eineq8,T8,eineq10,T10,iineq8,iineq10)
-#df_rural=data.frame(eineq8,T8,eineq10,T10,iineq8,iineq10)
-#df_new=data.frame(eineq8,T8,eineq10,T10,eineq12,T12)
-
-#library("writexl")
-#write_xlsx(df_new,"/Users/abj127/OneDrive - Harvard University/Harvard_Research/Air_Pollution/Paper_draft/Revisions/df_with_12_rural.xlsx")
-#
-
-# # to verify number of classifications with zctas
-# # > completeFun <- function(data, desiredCols) {
-# #   +     completeVec <- complete.cases(data[, desiredCols])
-# #   +     return(data[completeVec, ])
-# #   + }
-# 
-# for (i in c(2000:2016))
-# {
-# final_year=final_pm_data_new[which(final_pm_data_new$year==i),]
-# d=completeFun(final_year, "zcta")[,c(1,2,6,21,15)]
-# print(unique(d[,2]))
-# print(length(unique(d$zcta)))
-# print(colSums(!is.na(d))[4])
-# }
-
-
-
-
-
-
-
-
-################# More Atkinson Index Income Sensitivity Check, eps ####################
-# eps.list = c(0.25, 0.5, 0.75, 1.0, 2.0)
-# eps.color = c("#FFEDA0", "#FEB24C", "#FC4E2A", "#BD0026", "#800026")
-# 
-# pm.threshold = 10
-# year_counter = 1
-# eps.labs = c()
-# for (i in 1:length(eps.list)) eps.labs[i] = paste0("eps=", eps.list[i])
-# 
-# if (pm.threshold == 8) {
-#   ylim=c(0, 0.018)
-# } else { ylim=c(0, 0.05)}
-# plot(c(available_years),rep(NULL, 17),ylim=ylim,xlim=c(2000, 2017),type="l",
-#      lwd=2,xlab="Year",ylab="Atkinson Index - Income", col=eps.color[1])
-# 
-# Atkinson_PM_level_income = c() ## TODO check whether this ruin others 
-# for (ieps in 1:length(eps.list)) {
-#   for (y in available_years){ 
-#     year_counter= y - min(available_years) + 1
-#     pm_data = no_na_all_years_pm_data[no_na_all_years_pm_data$year==y,]
-#     
-#     # categorizing ZCTAs into income groups (1, 2, ..., 10) using percentiles
-#     value = pm_data$medhouseholdincome
-#     qtile = seq(1/n,1-1/n,1/n)
-#     Qlabel = c(1:n)
-#     g = with(pm_data, factor(findInterval(value, c(-Inf, quantile(value, probs=c(qtile)), Inf)), labels = Qlabel)) 
-#     pm_data$group=as.integer(g) 
-#     
-#     x_atkinson = atkinson.income(df=pm_data, pm.threshold=pm.threshold)
-#     Atkinson_PM_level_income[year_counter]=Atkinson(x_atkinson, parameter = eps.list[ieps])
-#   } 
-#   lines(c(available_years),Atkinson_PM_level_income,lwd=2,col=eps.color[ieps]) # = ieps)
-# }
-# grid()
-# legend("topleft", legend = eps.labs, lwd=2, cex=1, col=eps.color)
-################# End Atkinson Index Income Sensitivity Check, eps ####################
-
-
-
-
-################# More Atkinson Index Ethinic Sensitivity Check, Urban&Rural ####################
-# urban = FALSE
-# rural = TRUE
-# pm.thresholds = c(8,9,10,11,12,13)
-# pm.labs = c()
-# pm.lines = pm.thresholds - min(pm.thresholds) + 1
-# for (i in 1:length(pm.thresholds)) pm.labs[i] = paste0("pm", pm.thresholds[i])
-# 
-# plot(c(available_years),rep(NULL, 17),xlim=c(2000, 2017),ylim=c(0, 0.2),type="l",
-#      lwd=2,col="black",xlab="Year",ylab="Atkinson Index - Racial / Ethnic")
-# if (urban&!rural)
-#   plot(c(available_years),rep(NULL, 17),xlim=c(2000, 2017),ylim=c(0, 0.2),type="l",
-#        lwd=2,col="black",xlab="Year",ylab="Atkinson Index - Racial / Ethnic", main="urban")
-# if (!urban&rural)
-#   plot(c(available_years),rep(NULL, 17),xlim=c(2000, 2017),ylim=c(0, 0.2),type="l",
-#        lwd=2,col="black",xlab="Year",ylab="Atkinson Index - Racial / Ethnic", main="urban")
-# for (ipm in 1:length(pm.thresholds)) {
-#   for (y in available_years){
-# 
-#     year_counter= y - min(available_years) + 1
-#     pm_data = no_na_all_years_pm_data[no_na_all_years_pm_data$year==y,]
-#     stopifnot(sum(duplicated(pm_data$zcta)) == 0)
-#     if (urban&!rural) pm_data=pm_data[which(pm_data$urban==1),]
-#     if (!urban&rural) pm_data=pm_data[which(pm_data$urban==0),]
-# 
-#     x_atkinson = atkinson.ethnic(df=pm_data, pm.threshold=pm.thresholds[ipm])
-#     Atkinson_PM_level_ethnic[year_counter]=Atkinson(x_atkinson, parameter = eps)
-#   }
-#   lines(c(available_years),Atkinson_PM_level_ethnic,lwd=2,lty = pm.lines[ipm])
-# }
-# grid()
-# legend("topleft", legend = pm.labs,
-#        lty=pm.thresholds-min(pm.thresholds)+1,lwd=2, cex=1)
-
-################# End Atkinson Index Ethinic Sensitivity Check, Urban&Rural ####################
-
-
-# #Figure 1b
-# plot(c(thresholds,19),population_between_pm[1,],type="l",col="black",ylim=c(0,0.5),xlab="PM Threshold",ylab="Fraction of population",main="Fraction of population between thresholds",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-# lines(c(thresholds,19),population_between_pm[5,],col="red")
-# lines(c(thresholds,19),population_between_pm[9,],col="blue")
-# lines(c(thresholds,19),population_between_pm[13,],col="brown")
-# lines(c(thresholds,19),population_between_pm[17,],col="gray")
-# grid(length(thresholds),length(thresholds))
-# legend(16, 0.5, legend=c("2000", "2004","2008","2012","2016"),
-#        col=c("black", "red","blue","brown","gray"), lty=1, cex=0.8)
-# #Figure 2a
-# plot(c(available_years),black_average_pm,ylim=c(6, 15),xlim=c(2000, 2017),type="l",col="black",xlab="year",ylab="average PM2.5",main="PM level with race")
-# lines(c(available_years),white_average_pm,col="green")
-# lines(c(available_years),hisp_average_pm,col="red")
-# lines(c(available_years),asian_average_pm,col="brown")
-# lines(c(available_years),native_average_pm,col="blue")
-# grid(4,length(avg_pm$group_number))
-# legend(2012, 15, legend=c("black","white","hispanic","asian","native"),
-#        col=c("black", "green", "red","brown","blue"), lty=1, cex=0.8)
-#Figure 3
-# plot(c(thresholds,19),black_population_between_pm[1,],type="l",lty=1,col="black",ylim=c(0,0.55),xlab="threshold",ylab="% between adjacent threshold",main="Black vs. White")
-# lines(c(thresholds,19),black_population_between_pm[17,],col="black",lty=2)
-# lines(c(thresholds,19),white_population_between_pm[1,],col="red",lty=1)
-# lines(c(thresholds,19),white_population_between_pm[17,],col="red",lty=2)
-# grid(length(thresholds),length(thresholds))
-# legend(16, 0.55, legend=c("black-2000", "black-2016","white-2000","white-2016"),
-#        col=c("black", "black","red","red"), lty=c(1,2,1,2), cex=0.6)
-# Figure 3a (here r=8, p=3. In the report figure, r=10, p=1)
-# plot(c(thresholds,19),poor_population_between_pm[1,],type="l",col="black",lty=1, ylim=c(0,0.62),xlab="threshold",ylab="% between adjacent threshold",main="Poor vs. Rich")
-# lines(c(thresholds,19),poor_population_between_pm[17,],col="black",lty=2)
-# lines(c(thresholds,19),rich_population_between_pm[1,],col="red",lty=1)
-# lines(c(thresholds,19),rich_population_between_pm[17,],col="red",lty=2)
-# lines(c(thresholds,19),moderate_population_between_pm[1,],col="blue",lty=1)
-# lines(c(thresholds,19),moderate_population_between_pm[17,],col="blue",lty=2)
-# grid(length(thresholds),length(thresholds))
-# legend(14, 0.62, legend=c("poor-2000", "poor-2016","rich-2000","rich-2016"),
-#        col=c("black", "black","red","red"), lty=c(1,2,1,2), cex=0.8)
