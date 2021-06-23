@@ -48,7 +48,17 @@ rural = TRUE
 
 
 # SECTION 1 - READ AND CLEAN DATA---------------------------------------------------------
-final_pm_data<-read.csv("pm25_racial_income_disparities.csv", header=TRUE)
+part1 = read.csv("./data/data_part1.csv", header=TRUE)
+part2 = read.csv("./data/data_part2.csv", header=TRUE)
+part3 = read.csv("./data/data_part3.csv", header=TRUE)
+part4 = read.csv("./data/data_part4.csv", header=TRUE)
+part5 = read.csv("./data/data_part5.csv", header=TRUE)
+
+final_pm_data = do.call("rbind", list(part1, part2, part3, part4, part5))
+rm(part1, part2, part3, part4, part5)
+# write.csv(final_pm_data, "./data/pm25_racial_income_disparities.csv")
+# final_pm_data = read.csv("./data/pm25_racial_income_disparities.csv", header=TRUE)
+
 no_na_all_years_pm_data = na.omit(final_pm_data)
 
 
