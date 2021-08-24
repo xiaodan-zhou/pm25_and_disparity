@@ -1,14 +1,12 @@
-### Racial and income disparities in ambient exposure to fine particulate matter in1the United States 
-### last update: Aug 19, 2021 
+### Disparities in air pollution exposure across population and income groups
+### last update: Aug 24, 2021
+### ATTENTION: please rerun the whole script if any of these parameters in "SECTION 0 - SETUP" are changed
 
 library("tidyverse")
 library("ineq")
 library("ggplot2")
 
-
 # SECTION 0 - SETUP ---------------------------------------------------------
-# ATTENTION: please rerun the whole script if any of these parameters are changed 
-
 # all available years in dataset
 available_years = 2000:2016
 
@@ -26,7 +24,7 @@ thresholds=c(seq(6,16,2))
 
 # analysis on urban area only
 urban = T
-rural = F
+rural = T
 
 # function that returns the percentage of ethnic group exposed to PM higher than the input threshold
 atkinson.ethnic = function(df, pm.threshold) {
@@ -69,27 +67,27 @@ no_na_all_years_pm_data = na.omit(final_pm_data)
 # Note: All mean values computed are weighted by the population size
 
 # Average yearly PM value (weighted by population in every zipcode)
-national_average_pm = numeric(length(available_years)) 
+national_average_pm = numeric(length(available_years))
 
 # Percentage of total population between different PM levels
-population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
+population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
 
 # Percentage between different PM levels
-# income_average_pm = matrix(0, nrow = length(available_years), ncol = n) 
+# income_average_pm = matrix(0, nrow = length(available_years), ncol = n)
 
-# Average yearly PM value by the income groups 
+# Average yearly PM value by the income groups
 average_pm_poor = numeric(length(available_years))
 average_pm_moderate = numeric(length(available_years))
 average_pm_rich = numeric(length(available_years))
 
-# Average yearly PM value by the ethnic groups 
-black_average_pm = numeric(length(available_years))  
-hisp_average_pm = numeric(length(available_years))  
-native_average_pm = numeric(length(available_years))  
-asian_average_pm = numeric(length(available_years))  
+# Average yearly PM value by the ethnic groups
+black_average_pm = numeric(length(available_years))
+hisp_average_pm = numeric(length(available_years))
+native_average_pm = numeric(length(available_years))
+asian_average_pm = numeric(length(available_years))
 white_average_pm = numeric(length(available_years))
 
-# Average yearly PM value by the ethnic groups 
+# Average yearly PM value by the ethnic groups
 race_average_pm = data.frame(available_years = available_years,
                              black = 0, hisp = 0, native = 0, asian = 0, white = 0)
 
@@ -99,25 +97,25 @@ race_average_pm = data.frame(available_years = available_years,
 # pop_above12 = matrix(0, nrow = length(available_years), ncol = n)
 
 # Percentage of income group exposed to the given PM levels
-poor_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
-rich_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
-# moderate_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
+poor_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+rich_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+# moderate_population_between_pm = matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
 
 # Percentage of ethnic population between different PM levels
-black_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
-hisp_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)  
-native_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)  
-asian_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)  
-white_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1) 
+black_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+hisp_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+native_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+asian_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
+white_population_between_pm=matrix(0, nrow = length(available_years), ncol = length(thresholds)+1)
 
-# Atkinson/Gini Index by income group 
+# Atkinson/Gini Index by income group
 Atkinson_PM_level_income = numeric(length(available_years))
 Atkinson_PM_level_income_8 = numeric(length(available_years))
 Atkinson_PM_level_income_10 = numeric(length(available_years))
 Gini_PM_level_income_8 = numeric(length(available_years))
 Gini_PM_level_income_10 = numeric(length(available_years))
 
-# Atkinson/Gini Index by ethnic group 
+# Atkinson/Gini Index by ethnic group
 Atkinson_PM_level_ethnic = numeric(length(available_years))
 Atkinson_PM_level_ethnic_8 = numeric(length(available_years))
 Atkinson_PM_level_ethnic_10 = numeric(length(available_years))
@@ -130,10 +128,10 @@ Gini_PM_level_ethnic_12 = numeric(length(available_years))
 # for example, the percent of white population out of the total USA white population exposed to PM level 8-10ug/m3
 pops=c(seq(0,95,1))/100
 black_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))
-hisp_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))  
-native_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))  
-asian_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))  
-white_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops)) 
+hisp_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))
+native_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))
+asian_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))
+white_zcta_above_pop=matrix(0, nrow = length(available_years), ncol = length(pops))
 
 # Percentage of a ethnic&income group out of the ethinic population between different PM levels
 rich_black_average_pm=numeric(length(available_years))
@@ -153,13 +151,13 @@ poor_white_average_pm=numeric(length(available_years))
 
 # SECTION 3 - ANALYSIS: REPEATED FOR EVERY AVAILABLE YEAR ---------------------------------------------------------
 for (y in available_years){ 
-  year_counter= y - min(available_years) + 1
-  
+  year_counter = y - min(available_years) + 1
+
   ################################# SUBSET DATA BY YEAR AND LAND USE ###################################
   pm_data = no_na_all_years_pm_data[no_na_all_years_pm_data$year==y,]
   stopifnot(sum(duplicated(pm_data$zcta)) == 0) # confirm no duplicate in the data
-  if (urban&!rural) pm_data=pm_data[which(pm_data$urban==1),] 
-  if (!urban&rural) pm_data=pm_data[which(pm_data$urban==0),] 
+  if (urban&!rural) pm_data=pm_data[which(pm_data$urban==1),]
+  if (!urban&rural) pm_data=pm_data[which(pm_data$urban==0),]
   
   total_pop = sum(pm_data$population)
   weighted_pm = weighted.mean(pm_data$pm25, pm_data$population)
@@ -173,8 +171,8 @@ for (y in available_years){
   Qlabel = c(1:n)
 
   # categorizing ZCTAs into income groups (1, 2, ..., 10) using percentiles
-  g <- with(pm_data, factor(findInterval(value, c(-Inf, quantile(value, probs=c(qtile)), Inf)), labels = Qlabel)) 
-  pm_data$group=as.integer(g) 
+  g <- with(pm_data, factor(findInterval(value, c(-Inf, quantile(value, probs=c(qtile)), Inf)), labels = Qlabel))
+  pm_data$group=as.integer(g)
   
   length_pm = as.array(aggregate(pm_data$population, by=list(Category=pm_data$group), FUN=sum)[, 2]) / sum(pm_data$population)
   
@@ -197,10 +195,10 @@ for (y in available_years){
   # We find the percentage of people between certain PM levels for: 1) total population 2) poor 3) rich.
   pm_data$pm25bins = findInterval(pm_data$pm25, thresholds)
   pm_data$group3 = findInterval(pm_data$group, c(p+.5, r-.5))
-  pm_grouped_by2 = data.frame(pm_data %>% group_by(pm25bins, group3) %>% 
+  pm_grouped_by2 = data.frame(pm_data %>% group_by(pm25bins, group3) %>%
                     summarise(population = sum(population)) %>% spread(group3, population))
   if (dim(pm_grouped_by2)[1] < 7) {
-    pm_grouped_by2[7,] = c(6,0,0,0) 
+    pm_grouped_by2[7,] = c(6,0,0,0)
   }
   
   pop_betw_pm=numeric(length(thresholds)+1) # ALL POP
@@ -218,7 +216,7 @@ for (y in available_years){
   dp_pop_betw_pm = pm_grouped_by2[,2] / sum(pm_grouped_by2[,2], na.rm=TRUE) # Poor
   dm_pop_betw_pm = pm_grouped_by2[,3] / sum(pm_grouped_by2[,3], na.rm=TRUE) # Moderate
   dr_pop_betw_pm = pm_grouped_by2[,4] / sum(pm_grouped_by2[,4], na.rm=TRUE) # Rich
-  dp_pop_betw_pm[is.na(dp_pop_betw_pm)] = 0 
+  dp_pop_betw_pm[is.na(dp_pop_betw_pm)] = 0
   dm_pop_betw_pm[is.na(dm_pop_betw_pm)] = 0
   dr_pop_betw_pm[is.na(dr_pop_betw_pm)] = 0
   
@@ -340,25 +338,25 @@ for (y in available_years){
   white_above_pop=numeric(length(pops))
 
   for (j in c(1:length(pops))){
-    black_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_blk>=pops[j]], 
+    black_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_blk>=pops[j]],
                                        pm_data$black_pop[pm_data$pct_blk>=pops[j]])
-    hisp_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_hisp>=pops[j]], 
+    hisp_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_hisp>=pops[j]],
                                       pm_data$hisp_pop[pm_data$pct_hisp>=pops[j]])
-    native_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_native>=pops[j]], 
+    native_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_native>=pops[j]],
                                         pm_data$native_pop[pm_data$pct_native>=pops[j]])
-    asian_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_asian>=pops[j]], 
+    asian_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_asian>=pops[j]],
                                        pm_data$asian_pop[pm_data$pct_asian>=pops[j]])
-    white_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_white>=pops[j]], 
+    white_above_pop[j] = weighted.mean(pm_data$pm25[pm_data$pct_white>=pops[j]],
                                        pm_data$white_pop[pm_data$pct_white>=pops[j]])
   }
 
-  black_zcta_above_pop[year_counter,]=black_above_pop 
-  hisp_zcta_above_pop[year_counter,]=hisp_above_pop 
-  native_zcta_above_pop[year_counter,]=native_above_pop 
-  asian_zcta_above_pop[year_counter,]=asian_above_pop 
-  white_zcta_above_pop[year_counter,]=white_above_pop 
+  black_zcta_above_pop[year_counter,]=black_above_pop
+  hisp_zcta_above_pop[year_counter,]=hisp_above_pop
+  native_zcta_above_pop[year_counter,]=native_above_pop
+  asian_zcta_above_pop[year_counter,]=asian_above_pop
+  white_zcta_above_pop[year_counter,]=white_above_pop
 
-  ################################## ATKINSON INDEX ################################### TODO 
+  ################################## ATKINSON INDEX ###################################
   # Atkinson index by income groups
   AI_income=1-(sum(length_pm*(avg_pm$pm25/weighted_pm)^(1-eps)))^(1/(1-eps))
   Atkinson_PM_level_income[year_counter]=AI_income
@@ -399,35 +397,29 @@ for (y in available_years){
 
 
 ### CoV for race ------------------------------------------------------------------------------------
-b8= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-w8= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-h8= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-n8= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-a8= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-T8=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-eaverage8=(b8+w8+h8+n8+a8)/5
-eineq8=((abs(b8-eaverage8)^2+abs(w8-eaverage8)^2+abs(h8-eaverage8)^2+abs(a8-eaverage8)^2+abs(n8-eaverage8)^2)/5)/eaverage8^2
-eineq8 = sqrt(eineq8)
+b8 = 1 - rowSums(black_population_between_pm[,c(1,2)])
+w8 = 1 - rowSums(white_population_between_pm[,c(1,2)])
+h8 = 1 - rowSums(hisp_population_between_pm[,c(1,2)])
+n8 = 1 - rowSums(native_population_between_pm[,c(1,2)])
+a8 = 1 - rowSums(asian_population_between_pm[,c(1,2)])
+bwhna8 = matrix(c(b8, w8, h8, n8, a8), ncol = 5)
+eineq8 = apply(bwhna8, 1, sd) / apply(bwhna8, 1, mean)
 
-b10= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-w10= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-h10= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-n10= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-a10= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-T10=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-eaverage10=(b10+w10+h10+n10+a10)/5
-eineq10=((abs(b10-eaverage10)^2+abs(w10-eaverage10)^2+abs(h10-eaverage10)^2+abs(a10-eaverage10)^2+abs(n10-eaverage10)^2)/5)/eaverage10^2
-eineq10 = sqrt(eineq10) 
+b10 = 1 - rowSums(black_population_between_pm[,c(1,2,3)])
+w10 = 1 - rowSums(white_population_between_pm[,c(1,2,3)])
+h10 = 1 - rowSums(hisp_population_between_pm[,c(1,2,3)])
+n10 = 1 - rowSums(native_population_between_pm[,c(1,2,3)])
+a10 = 1 - rowSums(asian_population_between_pm[,c(1,2,3)])
+bwhna10 = matrix(c(b10, w10, h10, n10, a10), ncol = 5)
+eineq10 = apply(bwhna10, 1, sd) / apply(bwhna10, 1, mean)
 
-b12= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-w12= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-h12= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-n12= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-a12= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-T12=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-eaverage12=(b12+w12+h12+n12+a12)/5
-eineq12=((abs(b12-eaverage12)^2+abs(w12-eaverage12)^2+abs(h12-eaverage12)^2+abs(a12-eaverage12)^2+abs(n12-eaverage12)^2)/5)/eaverage12^2
-eineq12 = sqrt(eineq12)
+b12 = 1 - rowSums(black_population_between_pm[,c(1,2,3,4)])
+w12 = 1 - rowSums(white_population_between_pm[,c(1,2,3,4)])
+h12 = 1 - rowSums(hisp_population_between_pm[,c(1,2,3,4)])
+n12 = 1 - rowSums(native_population_between_pm[,c(1,2,3,4)])
+a12 = 1 - rowSums(asian_population_between_pm[,c(1,2,3,4)])
+bwhna12 = matrix(c(b12, w12, h12, n12, a12), ncol = 5)
+eineq12 = apply(bwhna12, 1, sd) / apply(bwhna12, 1, mean)
 
 ### National Figure 4 
 f4 = data.frame(year = c(available_years, available_years, available_years),
@@ -456,7 +448,7 @@ base_line3 = 0.5
 res = 300
 
 pm_colors = c(rgb(76,98,143,255,maxColorValue=255),
-              rgb(155,197,126,255,maxColorValue=255), 
+              rgb(155,197,126,255,maxColorValue=255),
               rgb(242,155,110,255,maxColorValue=255))
 
 income_lines = c("11", "longdash")
@@ -469,12 +461,13 @@ eps.labs = c("eps=0.25", "eps=0.5", "eps=0.75", "eps=1", "eps=2")
 
 if (urban==T&rural==T) {
   ### Figure 4
-  png("./output/inequality_ethnic_cov_updated_has_title.jpeg", units="mm", width=183, height=120, res=res)
+  png("./output/inequality_ethnic_cov_updated.jpeg", units="mm", width=183, height=120, res=res)
   # *** 
   # png("inequality_ethnic_cov_updated_for_legend.jpeg", units="mm", width=183, height=120, res=res)
   # *** 
+  yyscale = 100/max(f4$disparity)
   ggplot(data=f4) +
-    geom_bar(aes(x = year, y = disparity*150, fill=group), stat ="identity", position="dodge") +
+    geom_bar(aes(x = year, y = disparity*yyscale, fill=group), stat ="identity", position="dodge") +
     geom_line(aes(x = year, y = exposure, colour=group), size=base_line2) +
     theme_classic(base_size=14) + 
     scale_fill_manual(name="Disparities among racial/ethnic groups", values = pm_colors, labels=pm_labels, 
@@ -482,7 +475,7 @@ if (urban==T&rural==T) {
     scale_color_manual(name="Population living in pollution (%)", values = pm_colors, labels=pm_labels, 
                        guide = guide_legend(title.position = "top", nrow = 1)) +
     scale_y_continuous(name="Population living in pollution (%)", limits = c(0, 100),
-                       sec.axis = sec_axis(~./150, name="Disparities among racial/ethnic groups")) + 
+                       sec.axis = sec_axis(~./yyscale, name="Disparities among racial/ethnic groups")) + 
     guides(line = guide_legend(order = 0, title.position="top"), 
            color = guide_legend(order = 1, title.position="top")) + 
     # *** 
@@ -1046,7 +1039,6 @@ if (urban==T&rural==T) {
                   axis.text.y.right = element_blank()) + 
     scale_y_continuous(name="    ", limits = c(0, 100),
                        sec.axis = sec_axis(~./yyscale, name="",))
-  p4
 } else if (urban==T&rural==F) {
   p4 = p4 + theme(axis.title.y = element_blank(),
                   axis.text.y.left = element_blank(),
@@ -1056,31 +1048,20 @@ if (urban==T&rural==T) {
 } else {
   p4 = p4 + theme(axis.title.y = element_blank(),,
                   axis.text.y.left = element_blank(), 
-                  axis.ticks.y.left = element_blank())}
+                  axis.ticks.y.left = element_blank())
+}
 p4
 dev.off()
 
+### method ------------------------------------------------------------------------------------
+testineq = c(.11,.13,.14,.15,.17)
+sd(testineq)/mean(testineq)
 
+testineq = c(.10,.12,.14,.16,.18)
+sd(testineq)/mean(testineq)
 
-# p1_nation = p1
-# p2_nation = p2
-# p3_nation = p3
-# p4_nation = p4
-# p1_urban = p1
-# p2_urban = p2
-# p3_urban = p3
-# p4_urban = p4
-# rm(p1, p2, p3, p4)
-# 
-# arrange4 = ggarrange(p1_nation,p1_nation,p1_nation,
-#                      p2_nation,p2_nation,p2_nation,
-#                      p3_nation,p3_nation,p3_nation,
-#                      p4_nation,p4_nation,p4_nation,
-#                      ncol = 3, nrow = 4)
-# ggsave("FigA10_new.jpeg", arrange4,
-#        units="mm", width=width3*2, height=height3*4, dpi = 600, device='png')
-
-
+testineq = c(.010,.012,.014,.016,.018)
+sd(testineq)/mean(testineq)
 
 ### check stats ------------------------------------------------------------------------------------
 df = no_na_all_years_pm_data
