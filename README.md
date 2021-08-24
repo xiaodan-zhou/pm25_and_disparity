@@ -1,2 +1,1 @@
-# pm25_and_disparity
-Disparities in fine particulate matter exposure across racial and income groups in the United States
+Public Available Code and Data to Reproduce Analyses in "Disparities in air pollution exposure across population and income groups".
