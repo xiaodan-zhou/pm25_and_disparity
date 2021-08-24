@@ -1,6 +1,6 @@
-###################################
-### DATA NOT PUBLICLY AVAILABLE ### 
-###################################
+### Disparities in air pollution exposure across population and income groups
+### last update: Aug 24, 2021
+### ATTENTION: DATA NOT PUBLICLY AVAILABLE FOR THIS SCRIPT
 
 library("tidyverse")
 library("ineq")
@@ -373,36 +373,31 @@ a5 # dev.off()
 
 
 
+
 ### CoV for race ------------------------------------------------------------------------------------
-b8= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-w8= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-h8= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-n8= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-a8= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-T8=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]))
-eaverage8=(b8+w8+h8+n8+a8)/5
-eineq8=((abs(b8-eaverage8)^2+abs(w8-eaverage8)^2+abs(h8-eaverage8)^2+abs(a8-eaverage8)^2+abs(n8-eaverage8)^2)/5)/eaverage8^2
-eineq8 = sqrt(eineq8)
+b8 = 1 - rowSums(black_population_between_pm[,c(1,2)])
+w8 = 1 - rowSums(white_population_between_pm[,c(1,2)])
+h8 = 1 - rowSums(hisp_population_between_pm[,c(1,2)])
+n8 = 1 - rowSums(native_population_between_pm[,c(1,2)])
+a8 = 1 - rowSums(asian_population_between_pm[,c(1,2)])
+bwhna8 = matrix(c(b8, w8, h8, n8, a8), ncol = 5)
+eineq8 = apply(bwhna8, 1, sd) / apply(bwhna8, 1, mean)
 
-b10= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-w10= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-h10= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-n10= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-a10= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-T10=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]))
-eaverage10=(b10+w10+h10+n10+a10)/5
-eineq10=((abs(b10-eaverage10)^2+abs(w10-eaverage10)^2+abs(h10-eaverage10)^2+abs(a10-eaverage10)^2+abs(n10-eaverage10)^2)/5)/eaverage10^2
-eineq10 = sqrt(eineq10)
+b10 = 1 - rowSums(black_population_between_pm[,c(1,2,3)])
+w10 = 1 - rowSums(white_population_between_pm[,c(1,2,3)])
+h10 = 1 - rowSums(hisp_population_between_pm[,c(1,2,3)])
+n10 = 1 - rowSums(native_population_between_pm[,c(1,2,3)])
+a10 = 1 - rowSums(asian_population_between_pm[,c(1,2,3)])
+bwhna10 = matrix(c(b10, w10, h10, n10, a10), ncol = 5)
+eineq10 = apply(bwhna10, 1, sd) / apply(bwhna10, 1, mean)
 
-b12= apply(black_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-w12= apply(white_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-h12= apply(hisp_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-n12= apply(native_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-a12= apply(asian_population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-T12=apply(population_between_pm, 1, function(x) 1-(x[1]+x[2]+x[3]+x[4]))
-eaverage12=(b12+w12+h12+n12+a12)/5
-eineq12=((abs(b12-eaverage12)^2+abs(w12-eaverage12)^2+abs(h12-eaverage12)^2+abs(a12-eaverage12)^2+abs(n12-eaverage12)^2)/5)/eaverage12^2
-eineq12 = sqrt(eineq12)
+b12 = 1 - rowSums(black_population_between_pm[,c(1,2,3,4)])
+w12 = 1 - rowSums(white_population_between_pm[,c(1,2,3,4)])
+h12 = 1 - rowSums(hisp_population_between_pm[,c(1,2,3,4)])
+n12 = 1 - rowSums(native_population_between_pm[,c(1,2,3,4)])
+a12 = 1 - rowSums(asian_population_between_pm[,c(1,2,3,4)])
+bwhna12 = matrix(c(b12, w12, h12, n12, a12), ncol = 5)
+eineq12 = apply(bwhna12, 1, sd) / apply(bwhna12, 1, mean)
 
 ### National Figure 4 
 f4 = data.frame(year = c(available_years, available_years, available_years),
@@ -415,14 +410,15 @@ f4$group = as.factor(f4$group)
 f4$group = factor(f4$group, levels = c("above8", "above10", "above12"))
 
 
+yyscale = 100/max(f4$disparity)
 a4 = ggplot(data=f4) +
-  geom_bar(aes(x = year, y = disparity*120, fill=group), stat ="identity", position="dodge") +
+  geom_bar(aes(x = year, y = disparity*yyscale, fill=group), stat ="identity", position="dodge") +
   geom_line(aes(x = year, y = exposure, colour=group), size=base_line3) +
   theme_classic(base_size=base_size2) + 
   scale_color_manual(name="Population living in pollution (%)", values = pm_colors, labels=pm_labels, 
                      guide = guide_legend(title.position = "top", nrow = 1)) +
   scale_y_continuous(name="Population living in pollution (%)", limits = c(0, 100),#  breaks=seq(10, 100, 10), 
-                     sec.axis = sec_axis(~./120, name="Disparities among racial/ethnic groups")) + 
+                     sec.axis = sec_axis(~./yyscale, name="Disparities among racial/ethnic groups")) + 
   scale_fill_manual(name="Disparities among racial/ethnic groups", values = pm_colors, labels=pm_labels, 
                     guide = guide_legend(title.position = "top", nrow = 1)) + 
   guides(line = guide_legend(order = 0, title.position="top"), 
